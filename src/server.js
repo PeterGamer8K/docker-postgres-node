@@ -12,6 +12,106 @@ app.get("/", async (req, res) => {
 
   res.send("Welcome to my api")
 })
+//C - create
+app.post("/user/create", async (req, res) => {
+  const { name } = req.body
+
+  if (!name) {
+    return res.status(422).json("The email is required")
+  }
+
+  const id = new Date().getTime()
+
+  try {
+    const dbResponse = await databaseQuery(
+      `INSERT INTO users ("id", "name") values ($1, $2)`,
+      [id, name]
+    )
+
+    const data = dbResponse.rows
+
+    return res.status(201).json({ error: false, data })
+  } catch (error) {
+    return res.status(500).json({ error: true, msg: "Unexpected error" })
+  }
+})
+
+// R - read
+
+app.get("/user/read", async (req, res) => {
+  try {
+    const dbResponse = await databaseQuery("select * from users")
+    const data = dbResponse.rows
+
+    return res.status(200).json({ error: false, data })
+  } catch (error) {
+    return res.status(500).json({ error: true, msg: "Unexpected error" })
+  }
+})
+
+// U - update
+
+app.put("/user/update/", async (req, res) => {
+  const { user_id, name } = req.body
+
+  if (!user_id) {
+    return res.status(422).json({ error: true, msg: "The user id is required" })
+  }
+
+  if (!name) {
+    return res.status(422).json({ error: true, msg: "The name is required" })
+  }
+
+  try {
+    const userFound = await databaseQuery("SELECT * FROM users WHERE id = $1", [
+      user_id,
+    ])
+
+    if (userFound.rows.length == 0) {
+      return res.status(404).json({ erro: true, msg: "User not found" })
+    }
+
+    const dbResponse = await databaseQuery(
+      "UPDATE users SET name = $1 where id = $2",
+      [name, user_id]
+    )
+
+    const data = dbResponse.rows
+
+    return res.status(200).json({ error: false, data })
+  } catch (error) {
+    return res.status(500).json({ error: true, msg: "Unexpected error" })
+  }
+})
+
+// D - delete
+
+app.delete("/user/delete/user_id=:user_id", async (req, res) => {
+  const { user_id } = req.params
+
+  if (!user_id) {
+    return res.status(422).json({ error: true, msg: "The user id is required" })
+  }
+
+  try {
+    const userFound = await databaseQuery("SELECT * FROM users WHERE id = $1", [
+      user_id,
+    ])
+
+    if (userFound.rows.length <= 0) {
+      return res.status(404).json({ error: true, msg: "User not found" })
+    }
+    const dbResponse = await databaseQuery("DELETE FROM users WHERE id = $1", [
+      user_id,
+    ])
+
+    const data = dbResponse.rows
+
+    return res.status(200).json({ error: false, data })
+  } catch (error) {
+    return res.status(500).json({ error: true, msg: "Unexpected error" })
+  }
+})
 
 const PORT = 3333
 
