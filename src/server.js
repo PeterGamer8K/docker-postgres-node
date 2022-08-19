@@ -86,8 +86,8 @@ app.put("/user/update/", async (req, res) => {
 
 // D - delete
 
-app.delete("/user/delete/user_id=:user_id", async (req, res) => {
-  const { user_id } = req.params
+app.delete("/user/delete", async (req, res) => {
+  const { user_id } = req.body
 
   if (!user_id) {
     return res.status(422).json({ error: true, msg: "The user id is required" })
