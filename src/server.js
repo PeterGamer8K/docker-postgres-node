@@ -23,9 +23,14 @@ app.post("/user/create", async (req, res) => {
   const id = new Date().getTime()
 
   try {
+    await databaseQuery(`INSERT INTO users ("id", "name") values ($1, $2)`, [
+      id,
+      name,
+    ])
+
     const dbResponse = await databaseQuery(
-      `INSERT INTO users ("id", "name") values ($1, $2)`,
-      [id, name]
+      "SELECT * FROM users WHERE id = $1",
+      [id]
     )
 
     const data = dbResponse.rows
